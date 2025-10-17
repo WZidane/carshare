@@ -1,7 +1,6 @@
-FROM tomcat
+FROM tomcat:jdk21-openjdk-slim
 
-# Initialisation de tomcat
-RUN cp -R webapps.dist/* webapps/
+COPY target/*.war webapps/
 
 # Copie du driver JDBC
 COPY conf/mysql-connector-j-9.3.0.jar /usr/local/tomcat/lib/
