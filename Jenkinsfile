@@ -4,10 +4,12 @@ pipeline {
         jdk '21'
         maven '3.9.11'
     }
-    stage('Build Docker Image') {
-        steps {
-            script {
-                docker.build('carshare', '.')
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build('carshare', '.')
+                }
             }
         }
     }
