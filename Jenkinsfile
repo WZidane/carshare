@@ -20,7 +20,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'cp /home/urca/carshare/target/carshare-app.war .'
+                    sh 'cp target/carshare-app.war .'
 
                     sh 'docker build -t akizsmar/carshare-app:latest .'
                 }
