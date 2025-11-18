@@ -5,11 +5,9 @@ pipeline {
         maven '3.9.11'
     }
     stages {
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
-                script {
-                    docker.build('carshare', '.')
-                }
+                sh 'mvn -B -DskipTests clean package'
             }
         }
     }
