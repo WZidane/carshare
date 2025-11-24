@@ -15,4 +15,6 @@ class WebsiteUser(HttpUser):
     def login(self):
         # Simuler une requête POST sur la page de connexion avec un jeu de données fictif
         self.client.post("/login", json={"email": "testuser", "password": "password123"})
+        self.client.post("/login", json={"email": "testLocust@example.com", "password": "testLocustpasswd"})
+
 
