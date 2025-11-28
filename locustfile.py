@@ -8,7 +8,7 @@ class WebsiteUser(HttpUser):
     # La tâche principale : tester la page d'accueil
     @task
     def load_homepage(self):
-        self.client.get("/")  # Simuler une requête GET sur la page d'accueil
+        self.client.get("/carshare-app")  # Simuler une requête GET sur la page d'accueil
 
     # Autre tâche : tester la connexion de l'utilisateur
     @task(2)  # Cette tâche est plus "importante" (elle sera appelée 2x plus souvent)
