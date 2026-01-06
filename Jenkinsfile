@@ -43,7 +43,7 @@ pipeline {
                         
                         source ${VENV_DIR}/bin/activate &&
                         pip install --upgrade pip &&
-                        pip install selenium locust pytest pytest-html webdriver-manager
+                        pip install selenium locust pytest pytest-html
                     '
                 """
                 }

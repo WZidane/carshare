@@ -2,7 +2,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 def test_carshare_home():
@@ -14,10 +13,9 @@ def test_carshare_home():
     options.add_argument("--remote-debugging-port=9222")
     options.add_argument("--disable-gpu")
     options.binary_location = "/usr/bin/chromium-browser"
-    options.binary_location = "/usr/bin/chromium-browser"
 
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
+        service=Service("/usr/bin/chromedriver"),
         options=options
     )
 
