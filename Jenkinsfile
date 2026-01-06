@@ -94,6 +94,9 @@ pipeline {
 
             // Publie le rapport HTML
             publishHTML([
+                allowMissing: false,            
+                alwaysLinkToLastBuild: true,   
+                keepAll: true,               
                 reportDir: 'reports',
                 reportFiles: 'selenium_report.html',
                 reportName: 'Carshare Selenium Report'
