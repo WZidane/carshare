@@ -51,6 +51,8 @@ pipeline {
         stage('Run Locust') {
             steps {
                 sh """
+                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/locustfile.py
+
                 ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
                     cd ${REMOTE_APP_DIR} &&
                     source ${VENV_DIR}/bin/activate &&
