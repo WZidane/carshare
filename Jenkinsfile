@@ -50,7 +50,7 @@ pipeline {
         stage('Deploy To Pre Prod') {
             steps {
                 sh """
-                    ssh -i ${SSH_KEY} ${SSH_USER}@${SSH_HOST} 'mkdir -p /opt/carshare'
+                    ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} 'mkdir -p /opt/carshare'
 
                     scp -i ${SSH_KEY} docker-compose.yml ${SSH_USER_A}@${SSH_HOST_A}:/opt/carshare/docker-compose.yml
                     
