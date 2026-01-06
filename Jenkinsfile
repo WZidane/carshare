@@ -61,14 +61,14 @@ pipeline {
                 """
             }
         }
-        post {
-            always {
-                junit 'selenium_report.xml'
-                publishHTML([
-                    reportFiles: 'selenium_report.html',
-                    reportName: 'Carshare Selenium Report'
-                ])
-            }
+    }
+    post {
+        always {
+            junit 'selenium_report.xml'
+            publishHTML([
+                reportFiles: 'selenium_report.html',
+                reportName: 'Carshare Selenium Report'
+            ])
         }
     }
 }
