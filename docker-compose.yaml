@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
 
   mysql:
-    image: akizsmar/mysql:latest
+    image: akizsmar/carshare-mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: carshare
