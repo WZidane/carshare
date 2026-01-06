@@ -58,8 +58,8 @@ pipeline {
                     
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
                         cd ~/carshare &&
-                        docker-compose pull &&
-                        docker-compose up -d
+                        docker compose pull &&
+                        docker compose up -d
                     '
                 """
             }
