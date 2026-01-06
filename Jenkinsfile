@@ -64,10 +64,10 @@ pipeline {
                         source ${VENV_DIR}/bin/activate &&
                         pytest test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
                     '
-
-                    scp ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/selenium_report.* reports/
                     """
                 }
+
+                sh 'scp ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/selenium_report.* $WORKSPACE/reports'
             }
         }
     }
