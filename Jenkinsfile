@@ -52,12 +52,12 @@ pipeline {
                 sh """
                     ssh-keyscan -H ${SSH_HOST_A} >> ~/.ssh/known_hosts
 
-                    ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} 'mkdir -p /opt/carshare'
+                    ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} 'mkdir -p ~/carshare'
 
-                    scp -i ${SSH_KEY} docker-compose.yml ${SSH_USER_A}@${SSH_HOST_A}:/opt/carshare/docker-compose.yml
+                    scp -i ${SSH_KEY} docker-compose.yml ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/docker-compose.yml
                     
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
-                        cd /opt/carshare &&
+                        cd ~/carshare &&
                         docker-compose pull &&
                         docker-compose up -d
                     '
