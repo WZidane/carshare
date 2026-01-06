@@ -56,31 +56,43 @@ pipeline {
             }
         }
 
-        stage('Run Selenium') {
+        stage('Run Selenium on Remote Server') {
             steps {
                 dir('tests') {
                     sh """
-                    scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/test_selenium.py
+                    # Copie le test sur le serveur distant
+                    scp -i ${SSH_KEY} test_selenium.py ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_APP_DIR}/
 
-                    ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} '
+                    # Lance pytest sur le serveur distant
+                    ssh -i ${SSH_KEY} ${REMOTE_USER}@${REMOTE_HOST} "
                         cd ${REMOTE_APP_DIR} &&
                         source ${VENV_DIR}/bin/activate &&
                         pytest test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
-                    '
+                    "
                     """
                 }
             }
         }
-        stage('Get Reports Selenium') {
-            steps {
 
-                sh """scp ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/selenium_report.* $WORKSPACE/reports"""
+        stage('Get Selenium Reports') {
+            steps {
+                sh """
+                # Récupère les rapports depuis le serveur distant
+                scp -i ${SSH_KEY} ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_APP_DIR}/selenium_report.* $WORKSPACE/reports/
+
+                # Vérifie que les fichiers existent bien
+                ls -l $WORKSPACE/reports/
+                """
             }
         }
     }
+
     post {
         always {
+            // Publie les résultats JUnit
             junit 'reports/selenium_report.xml'
+
+            // Publie le rapport HTML
             publishHTML([
                 reportDir: 'reports',
                 reportFiles: 'selenium_report.html',
