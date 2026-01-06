@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
 
-def carshare_home():
+def test_carshare_home():
     
     options = Options()
     options.add_argument("--headless")
@@ -53,6 +53,3 @@ def carshare_home():
 
     # Fermer le navigateur
     driver.quit()
-
-if __name__ == "__main__":
-    carshare_home()
