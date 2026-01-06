@@ -26,7 +26,7 @@ pipeline {
         }
         stage('Build App') {
             steps {
-                dir('db') {
+                dir('app') {
                     sh 'mvn -B -DskipTests clean package'
                     sh "docker build -t ${APP_IMAGE} ."
                 }
