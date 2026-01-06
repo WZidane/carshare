@@ -5,7 +5,7 @@ pipeline {
         DOCKER_REGISTRY = "akizsmar"
         APP_IMAGE = "${DOCKER_REGISTRY}/carshare-app:latest"
         DB_IMAGE  = "${DOCKER_REGISTRY}/carshare-mysql:latest"
-        SSH_KEY = "/var/lib/jenkins/.ssh/id_ed25519_jenkins"
+        SSH_KEY = "~/.ssh/id_ed25519_jenkins"
         SSH_USER_A = "urca"
         SSH_USER_B = "urca"
         SSH_HOST_A = "10.11.19.2"
@@ -50,6 +50,8 @@ pipeline {
         stage('Deploy To Pre Prod') {
             steps {
                 sh """
+                    ssh-keyscan -H ${SSH_HOST_A} >> ~/.ssh/known_hosts
+
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} 'mkdir -p /opt/carshare'
 
                     scp -i ${SSH_KEY} docker-compose.yml ${SSH_USER_A}@${SSH_HOST_A}:/opt/carshare/docker-compose.yml
