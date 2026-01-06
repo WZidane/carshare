@@ -21,6 +21,36 @@ pipeline {
         maven '3.9.11'
     }
     stages {
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh 'docker login -u $USERNAME -p $PASSWORD'
+                }
+            }
+        }
+        stage('Build App') {
+            steps {
+                dir('app') {
+                    sh 'mvn -B -DskipTests clean package'
+                    sh "docker build -t ${APP_IMAGE} ."
+                }
+            }
+        }
+        stage('Build DB') {
+            steps {
+                dir('db') {
+                    sh "docker build -t ${DB_IMAGE} ."
+                }
+            }
+        }
+        stage('Push Images') {
+            steps {
+                script {
+                    sh "docker push ${APP_IMAGE}"
+                    sh "docker push ${DB_IMAGE}"
+                }
+            }
+        }
         stage('Deploy To Pre Prod') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -50,6 +80,20 @@ pipeline {
             }
         }
 
+        stage('Run Locust') {
+            steps {
+                sh """
+                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/locustfile.py
+
+                ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
+                    cd ${REMOTE_APP_DIR} &&
+                    source ${VENV_DIR}/bin/activate &&
+                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=report.html
+                '
+                """
+            }
+        }
+
         stage('Create Reports Directory') {
             steps {
                 sh 'mkdir -p $WORKSPACE/reports'
@@ -61,7 +105,7 @@ pipeline {
                 dir('tests') {
                     sh """
                     # Copie le test sur le serveur distant
-                    scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/
+                    scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}
 
                     # Lance pytest sur le serveur distant
                     ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} "
