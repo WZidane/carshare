@@ -49,6 +49,7 @@ pipeline {
         }
         stage('Deploy To Pre Prod') {
             steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                 sh """
                     ssh-keyscan -H ${SSH_HOST_A} >> ~/.ssh/known_hosts
 
@@ -58,10 +59,12 @@ pipeline {
                     
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
                         cd ~/carshare &&
+                        docker login -u $USERNAME -p $PASSWORD &&
                         docker compose pull &&
                         docker compose up -d
                     '
                 """
+                }
             }
         }
     }
