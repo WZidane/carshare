@@ -1,6 +1,7 @@
 from locust import HttpUser, task, between
 
 class WebsiteUser(HttpUser):
+    host = "http://10.11.19.2:8090"
     wait_time = between(1, 5)  # Attendre entre 1 et 5 secondes entre les tâches
 
     @task
