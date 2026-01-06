@@ -41,24 +41,33 @@ pipeline {
                         
                         source ${VENV_DIR}/bin/activate &&
                         pip install --upgrade pip &&
-                        pip install selenium locust
+                        pip install selenium locust pytest pytest-html webdriver-manager
                     '
                 """
                 }
             }
         }
 
-        stage('Run Locust') {
+        stage('Run Selenium') {
             steps {
                 sh """
-                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/locustfile.py
+                scp -i ${SSH_KEY} selenium.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/selenium.py
 
                 ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
                     cd ${REMOTE_APP_DIR} &&
                     source ${VENV_DIR}/bin/activate &&
-                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=report.html
+                    pytest tests/test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
                 '
                 """
+            }
+        }
+        post {
+            always {
+                junit 'selenium_report.xml'
+                publishHTML([
+                    reportFiles: 'selenium_report.html',
+                    reportName: 'Carshare Selenium Report'
+                ])
             }
         }
     }

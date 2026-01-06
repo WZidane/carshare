@@ -4,8 +4,16 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 def carshare_home():
-    # Initialiser le navigateur (ici Chrome)
-    driver = webdriver.Chrome()
+    
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(
+        service=Service(ChromeDriverManager().install()),
+        options=options
+    )
 
     # Accéder à l'URL de l'application
     driver.get("http://10.11.19.2:8090/carshare-app")
@@ -13,16 +21,16 @@ def carshare_home():
     # Vérifier que la page se charge et le titre est correct
     assert "Carshare" in driver.title
 
-    # Vérifier la présence d'un élément clé sur la page
+    # Vérifier la présence d'un élément sur la page
     try:
-        element = driver.find_element(By.ID, "homepage-title")
+        element = driver.find_element(By.CSS_SELECTOR, "h1.ma-classe")
         assert element.is_displayed()  # Vérifie que l'élément est visible
     except Exception as e:
         print(f"Erreur lors de la vérification de l'élément : {e}")
         driver.quit()
         return
 
-    # Optionnel : Interaction avec un formulaire, par exemple un champ de recherche
+    # Interaction avec un formulaire
     try:
         search_depart = driver.find_element(By.NAME, "depart")
         search_depart.send_keys("Paris")
