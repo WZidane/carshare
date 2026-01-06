@@ -1,12 +1,8 @@
 services:
 
   tomcat:
-    image: tomcat
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - ./target/carshare-app:/usr/local/tomcat/webapps/carshare-app/
+    image: akizsmar/carshare-app:latest
+    container_name: carshare
     ports:
       - "8090:8080"
     networks:
@@ -16,7 +12,7 @@ services:
     restart: unless-stopped
 
   mysql:
-    image: mysql
+    image: akizsmar/mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: carshare
@@ -26,7 +22,6 @@ services:
       - "3310:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - carshare
     restart: unless-stopped
