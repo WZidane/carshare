@@ -52,6 +52,9 @@ pipeline {
 
         stage('Run Selenium') {
             steps {
+
+                sh 'mkdir -p $WORKSPACE/reports'
+
                 dir('tests') {
                     sh """
                     scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/test_selenium.py
