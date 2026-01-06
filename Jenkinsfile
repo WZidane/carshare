@@ -28,14 +28,14 @@ pipeline {
             steps {
                 dir('app') {
                     sh 'mvn -B -DskipTests clean package'
-                    sh "docker build -t ${APP_IMAGE} /app/"
+                    sh "docker build -t ${APP_IMAGE} ."
                 }
             }
         }
         stage('Build DB') {
             steps {
                 dir('db') {
-                    sh "docker build -t ${DB_IMAGE} /db/"
+                    sh "docker build -t ${DB_IMAGE} ."
                 }
             }
         }
