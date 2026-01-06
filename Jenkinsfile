@@ -19,36 +19,6 @@ pipeline {
         maven '3.9.11'
     }
     stages {
-        stage('Docker Login') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh 'docker login -u $USERNAME -p $PASSWORD'
-                }
-            }
-        }
-        stage('Build App') {
-            steps {
-                dir('app') {
-                    sh 'mvn -B -DskipTests clean package'
-                    sh "docker build -t ${APP_IMAGE} ."
-                }
-            }
-        }
-        stage('Build DB') {
-            steps {
-                dir('db') {
-                    sh "docker build -t ${DB_IMAGE} ."
-                }
-            }
-        }
-        stage('Push Images') {
-            steps {
-                script {
-                    sh "docker push ${APP_IMAGE}"
-                    sh "docker push ${DB_IMAGE}"
-                }
-            }
-        }
         stage('Deploy To Pre Prod') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
