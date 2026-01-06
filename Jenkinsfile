@@ -133,10 +133,8 @@ pipeline {
 
     post {
         always {
-            // Publie les résultats JUnit
             junit 'reports/selenium_report.xml'
 
-            // Publie le rapport HTML
             publishHTML([
                 allowMissing: false,            
                 alwaysLinkToLastBuild: true,   
