@@ -9,4 +9,4 @@ class WebsiteUser(HttpUser):
 
     @task(3)  # Cette tâche sera potentiellement appelée 3 fois plus souvent. Cela permet de simuler les pages qui seront le plus souvent sollicitées
     def login(self):
-        self.client.post("/login", json={"email": "bob@example.com", "password": "12345"})
+        self.client.post("/carshare-app/login", json={"email": "bob@example.com", "password": "12345"})
