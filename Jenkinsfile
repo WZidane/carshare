@@ -59,7 +59,7 @@ pipeline {
                     ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} '
                         cd ${REMOTE_APP_DIR} &&
                         source ${VENV_DIR}/bin/activate &&
-                        pytest test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
+                        pytest test_selenium.py --junitxml=$WORKSPACE/reports/selenium_report.xml --html=$WORKSPACE/reports/selenium_report.html --self-contained-html
                     '
 
                     scp ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/selenium_report.* $WORKSPACE/reports/
@@ -70,7 +70,7 @@ pipeline {
     }
     post {
         always {
-            junit 'selenium_report.xml'
+            junit '$WORKSPACE/reports/selenium_report.xml'
             publishHTML([
                 reportDir: 'reports',
                 reportFiles: 'selenium_report.html',
