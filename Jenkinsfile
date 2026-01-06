@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         DOCKER_REGISTRY = "akizsmar"
+        REMOTE_APP_DIR = "~/carshare/"
+        VENV_DIR = "~/carshare/venv"
         APP_IMAGE = "${DOCKER_REGISTRY}/carshare-app:latest"
         DB_IMAGE  = "${DOCKER_REGISTRY}/carshare-mysql:latest"
         SSH_KEY = "~/.ssh/id_ed25519_jenkins"
@@ -62,9 +64,29 @@ pipeline {
                         docker login -u $USERNAME -p $PASSWORD &&
                         docker compose pull &&
                         docker compose up -d
+
+                        if [ ! -d "${VENV_DIR}" ]; then
+                            python3 -m venv ${VENV_DIR}
+                        fi
+                        
+                        source ${VENV_DIR}/bin/activate &&
+                        pip install --upgrade pip &&
+                        pip install selenium locust
                     '
                 """
                 }
+            }
+        }
+
+        stage('Run Locust') {
+            steps {
+                sh """
+                ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
+                    cd ${REMOTE_APP_DIR} &&
+                    source ${VENV_DIR}/bin/activate &&
+                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=report.html
+                '
+                """
             }
         }
     }
