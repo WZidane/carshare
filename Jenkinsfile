@@ -54,7 +54,7 @@ pipeline {
 
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} 'mkdir -p ~/carshare'
 
-                    scp -i ${SSH_KEY} docker-compose.yml ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/docker-compose.yml
+                    scp -i ${SSH_KEY} docker-compose.yaml ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/docker-compose.yml
                     
                     ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
                         cd ~/carshare &&
