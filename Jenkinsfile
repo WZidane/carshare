@@ -50,15 +50,17 @@ pipeline {
 
         stage('Run Selenium') {
             steps {
-                sh """
-                scp -i ${SSH_KEY} selenium.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/selenium.py
+                dir('tests') {
+                    sh """
+                    scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/test_selenium.py
 
-                ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
-                    cd ${REMOTE_APP_DIR} &&
-                    source ${VENV_DIR}/bin/activate &&
-                    pytest tests/test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
-                '
-                """
+                    ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
+                        cd ${REMOTE_APP_DIR} &&
+                        source ${VENV_DIR}/bin/activate &&
+                        pytest test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
+                    '
+                    """
+                }
             }
         }
     }
