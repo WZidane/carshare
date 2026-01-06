@@ -61,10 +61,10 @@ pipeline {
                 dir('tests') {
                     sh """
                     # Copie le test sur le serveur distant
-                    scp -i ${SSH_KEY} test_selenium.py ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_APP_DIR}/
+                    scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/
 
                     # Lance pytest sur le serveur distant
-                    ssh -i ${SSH_KEY} ${REMOTE_USER}@${REMOTE_HOST} "
+                    ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} "
                         cd ${REMOTE_APP_DIR} &&
                         source ${VENV_DIR}/bin/activate &&
                         pytest test_selenium.py --junitxml=selenium_report.xml --html=selenium_report.html --self-contained-html
@@ -78,7 +78,7 @@ pipeline {
             steps {
                 sh """
                 # Récupère les rapports depuis le serveur distant
-                scp -i ${SSH_KEY} ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_APP_DIR}/selenium_report.* $WORKSPACE/reports/
+                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/selenium_report.* $WORKSPACE/reports/
 
                 # Vérifie que les fichiers existent bien
                 ls -l $WORKSPACE/reports/
