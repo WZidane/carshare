@@ -23,7 +23,7 @@ def carshare_home():
 
     # Vérifier la présence d'un élément sur la page
     try:
-        element = driver.find_element(By.CSS_SELECTOR, "h1.ma-classe")
+        element = driver.find_element(By.CSS_SELECTOR, "h1.text-4xl.font-bold")
         assert element.is_displayed()  # Vérifie que l'élément est visible
     except Exception as e:
         print(f"Erreur lors de la vérification de l'élément : {e}")
