@@ -57,12 +57,12 @@ pipeline {
                 sh """
                     ssh-keyscan -H ${SSH_HOST_B} >> ~/.ssh/known_hosts
 
-                    ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} 'mkdir -p ~/carshare'
+                    ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} 'mkdir -p ${REMOTE_APP_DIR}'
 
-                    scp -i ${SSH_KEY} docker-compose.yaml ${SSH_USER_B}@${SSH_HOST_B}:~/carshare/docker-compose.yml
+                    scp -i ${SSH_KEY} docker-compose.yaml ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}docker-compose.yaml
                     
                     ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} '
-                        cd ~/carshare &&
+                        cd ${REMOTE_APP_DIR} &&
                         docker login -u $USERNAME -p $PASSWORD &&
                         docker compose pull &&
                         docker compose up -d
@@ -73,41 +73,21 @@ pipeline {
                         
                         source ${VENV_DIR}/bin/activate &&
                         pip install --upgrade pip &&
-                        pip install selenium locust pytest pytest-html
+                        pip install selenium pytest pytest-html
                     '
                 """
                 }
             }
         }
 
-        stage('Run Locust') {
-            steps {
-                sh """
-                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_A}@${SSH_HOST_A}:~/carshare/locustfile.py
-
-                ssh -i ${SSH_KEY} ${SSH_USER_A}@${SSH_HOST_A} '
-                    cd ${REMOTE_APP_DIR} &&
-                    source ${VENV_DIR}/bin/activate &&
-                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=report.html
-                '
-                """
-            }
-        }
-
-        stage('Create Reports Directory') {
+        stage('Run Selenium On Pre Prod') {
             steps {
                 sh 'mkdir -p $WORKSPACE/reports'
-            }
-        }
 
-        stage('Run Selenium on Remote Server') {
-            steps {
                 dir('tests') {
                     sh """
-                    # Copie le test sur le serveur distant
                     scp -i ${SSH_KEY} test_selenium.py ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}
 
-                    # Lance pytest sur le serveur distant
                     ssh -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B} "
                         cd ${REMOTE_APP_DIR} &&
                         source ${VENV_DIR}/bin/activate &&
@@ -121,11 +101,59 @@ pipeline {
         stage('Get Selenium Reports') {
             steps {
                 sh """
-                # Récupère les rapports depuis le serveur distant
                 scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/selenium_report.* $WORKSPACE/reports/
+                """
+            }
+        }
 
-                # Vérifie que les fichiers existent bien
-                ls -l $WORKSPACE/reports/
+        stage('Deploy To Prod') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                sh """
+                    ssh-keyscan -H ${SSH_HOST_C} >> ~/.ssh/known_hosts
+
+                    ssh -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C} 'mkdir -p ${REMOTE_APP_DIR}'
+
+                    scp -i ${SSH_KEY} docker-compose.yaml ${SSH_USER_C}@${SSH_HOST_C}:${REMOTE_APP_DIR}docker-compose.yaml
+                    
+                    ssh -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C} '
+                        cd ${REMOTE_APP_DIR} &&
+                        docker login -u $USERNAME -p $PASSWORD &&
+                        docker compose pull &&
+                        docker compose up -d
+
+                        if [ ! -d "${VENV_DIR}" ]; then
+                            python3 -m venv ${VENV_DIR}
+                        fi
+                        
+                        source ${VENV_DIR}/bin/activate &&
+                        pip install --upgrade pip &&
+                        pip install locust
+                    '
+                """
+                }
+            }
+        }
+
+        stage('Run Locust On Prod') {
+            steps {
+                sh """
+                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_C}@${SSH_HOST_C}:${REMOTE_APP_DIR}locustfile.py
+
+                ssh -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C} '
+                    cd ${REMOTE_APP_DIR} &&
+                    source ${VENV_DIR}/bin/activate &&
+                    pip install locust &&
+                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=locust_report.html
+                '
+                """
+            }
+        }
+
+        stage('Get Locust Reports') {
+            steps {
+                sh """
+                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/locust_report.* $WORKSPACE/reports/
                 """
             }
         }
@@ -142,6 +170,15 @@ pipeline {
                 reportDir: 'reports',
                 reportFiles: 'selenium_report.html',
                 reportName: 'Carshare Selenium Report'
+            ])
+
+            publishHTML([
+                allowMissing: false,            
+                alwaysLinkToLastBuild: true,   
+                keepAll: true,            
+                reportDir: 'reports',
+                reportFiles: 'locust_report.html',
+                reportName: 'Carshare Locust Report',
             ])
         }
     }
