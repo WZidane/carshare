@@ -101,7 +101,7 @@ pipeline {
         stage('Get Selenium Reports') {
             steps {
                 sh """
-                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/selenium_report.* $WORKSPACE/reports/
+                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}selenium_report.* $WORKSPACE/reports/
                 """
             }
         }
@@ -137,23 +137,25 @@ pipeline {
 
         stage('Run Locust On Prod') {
             steps {
-                sh """
-                scp -i ${SSH_KEY} locustfile.py ${SSH_USER_C}@${SSH_HOST_C}:${REMOTE_APP_DIR}locustfile.py
+                dir('tests') {
+                    sh """
+                    scp -i ${SSH_KEY} locustfile.py ${SSH_USER_C}@${SSH_HOST_C}:${REMOTE_APP_DIR}locustfile.py
 
-                ssh -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C} '
-                    cd ${REMOTE_APP_DIR} &&
-                    source ${VENV_DIR}/bin/activate &&
-                    pip install locust &&
-                    locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=locust_report.html
-                '
-                """
+                    ssh -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C} '
+                        cd ${REMOTE_APP_DIR} &&
+                        source ${VENV_DIR}/bin/activate &&
+                        pip install locust &&
+                        locust -f locustfile.py --headless -u 10 -r 2 --run-time 1m --html=locust_report.html
+                    '
+                    """
+                }
             }
         }
 
         stage('Get Locust Reports') {
             steps {
                 sh """
-                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}/locust_report.* $WORKSPACE/reports/
+                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}locust_report.* $WORKSPACE/reports/
                 """
             }
         }
