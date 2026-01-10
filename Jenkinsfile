@@ -155,7 +155,7 @@ pipeline {
         stage('Get Locust Reports') {
             steps {
                 sh """
-                scp -i ${SSH_KEY} ${SSH_USER_B}@${SSH_HOST_B}:${REMOTE_APP_DIR}locust_report.* $WORKSPACE/reports/
+                scp -i ${SSH_KEY} ${SSH_USER_C}@${SSH_HOST_C}:${REMOTE_APP_DIR}locust_report.* $WORKSPACE/reports/
                 """
             }
         }
